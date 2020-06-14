@@ -1,3 +1,6 @@
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import OneHotEncoder
+
 #if credit[['home']].isnull().any() raise Exception
 # isinstance(credit['home'], np.double) Logistic else Linear
 
@@ -20,6 +23,7 @@ class TargetEncoder:
         """
         self.cols = cols
         self._encoding = {}
+    
 
     def fit(self, X, y):
         """Encode given columns of X according to y.
@@ -36,8 +40,7 @@ class TargetEncoder:
             self._encoding[col] = coef
             
         return self
-            #self._encoding[col] = coef.loc[X[col]].reset_index(drop=True)
-            #return pd.concat(embeddings, axis=1)
+    
 
     def transform(self, X):
         """Transform categorical data based on mapping learnt at fitting time.
