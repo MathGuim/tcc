@@ -1,5 +1,6 @@
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import OneHotEncoder
+import pandas as pd
 
 #if credit[['home']].isnull().any() raise Exception
 # isinstance(credit['home'], np.double) Logistic else Linear
@@ -31,6 +32,8 @@ class TargetEncoder:
         :param pandas.Series y: pandas Series of target values, shape (n_samples,).
         :return: None
         """
+        X = pd.DataFrame(X, columns=self.cols)
+        
         for col in self.cols:
             ohe = OneHotEncoder().fit(X[[col]])
             names = [n.strip('x0_') for n in ohe.get_feature_names()]
@@ -51,9 +54,11 @@ class TargetEncoder:
         """
         if not self._encoding:
             raise ValueError('`fit` method must be called before `transform`.')
-        assert all(c in X.columns for c in self.cols)
+        
+        X_encoded = pd.DataFrame(X, columns=self.cols)
+        
+        assert all(c in X_encoded.columns for c in self.cols)
 
-        X_encoded = X.copy(deep=True)
         for col, mapping in self._encoding.items():
             X_encoded.loc[:, col] = X_encoded[col].map(mapping)
         

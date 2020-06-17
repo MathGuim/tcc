@@ -30,13 +30,14 @@ class WeigthOfEvidenceEncoder:
         :param pandas.Series y: pandas Series of target values, shape (n_samples,).
         :return: None
         """
+        X = pd.DataFrame(X, columns=self.cols)
         classes = y.unique()
         assert len(classes) == 2
         
         for col in self.cols:
             cross = pd.crosstab(X[col], y)
             woe = {}
-            for cat in X[col].cat.categories:
+            for cat in X[col].unique():
                 num = (cross[classes[0]].loc[cat] + self.laplace) / (cross[classes[0]].sum() + 2 * self.laplace)
                 den = (cross[classes[1]].loc[cat] + self.laplace) / (cross[classes[1]].sum() + 2 * self.laplace)
                 woe[cat] = pd.np.log(num / den)
@@ -54,9 +55,10 @@ class WeigthOfEvidenceEncoder:
         """
         if not self._encoding:
             raise ValueError('`fit` method must be called before `transform`.')
+
+        X_encoded = pd.DataFrame(X, columns=self.cols)
         assert all(c in X.columns for c in self.cols)
 
-        X_encoded = X.copy(deep=True)
         for col, mapping in self._encoding.items():
             X_encoded.loc[:, col] = X_encoded[col].map(mapping)
         
