@@ -1,11 +1,12 @@
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import OneHotEncoder
+from sklearn.base import TransformerMixin
 import pandas as pd
 
 #if credit[['home']].isnull().any() raise Exception
 # isinstance(credit['home'], np.double) Logistic else Linear
 
-class TargetEncoder:
+class TargetEncoder(TransformerMixin):
     """
     Target Encoder for categorical features.
     """
@@ -63,15 +64,4 @@ class TargetEncoder:
             X_encoded.loc[:, col] = X_encoded[col].map(mapping)
         
         return X_encoded
-
-    def fit_transform(self, X, y=None):
-        """Encode given columns of X according to y, and transform X based on the learnt mapping.
-        :param pandas.DataFrame X: DataFrame of features, shape (n_samples, n_features). Must contain columns to encode.
-        :param pandas.Series y: pandas Series of target values, shape (n_samples,).
-            Required only for encoders that need it: TargetEncoder, WeightOfEvidenceEncoder
-        :return: encoded DataFrame of shape (n_samples, n_features), initial categorical columns are dropped, and
-            replaced with encoded columns. DataFrame passed in argument is unchanged.
-        :rtype: pandas.DataFrame
-    """
-        self.fit(X, y)
-        return self.transform(X)
+    
