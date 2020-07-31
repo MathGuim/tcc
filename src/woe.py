@@ -1,10 +1,11 @@
 import pandas as pd
-from sklearn.base import TransformerMixin
+import numpy as np
+from sklearn.base import TransformerMixin, BaseEstimator
 
 #if credit[['home']].isnull().any() raise Exception
 # isinstance(credit['home'], np.double) Logistic else Linear
 
-class WeigthOfEvidenceEncoder(TransformerMixin):
+class WeigthOfEvidenceEncoder(BaseEstimator, TransformerMixin):
     """
     Target Encoder for categorical features.
     """
@@ -41,7 +42,7 @@ class WeigthOfEvidenceEncoder(TransformerMixin):
             for cat in X[col].unique():
                 num = (cross[classes[0]].loc[cat] + self.laplace) / (cross[classes[0]].sum() + 2 * self.laplace)
                 den = (cross[classes[1]].loc[cat] + self.laplace) / (cross[classes[1]].sum() + 2 * self.laplace)
-                woe[cat] = pd.np.log(num / den)
+                woe[cat] = np.log(num / den)
             self._encoding[col] = woe
 
         return self
@@ -58,7 +59,7 @@ class WeigthOfEvidenceEncoder(TransformerMixin):
             raise ValueError('`fit` method must be called before `transform`.')
 
         X_encoded = pd.DataFrame(X, columns=self.cols)
-        assert all(c in X.columns for c in self.cols)
+        assert all(c in X_encoded.columns for c in self.cols)
 
         for col, mapping in self._encoding.items():
             X_encoded.loc[:, col] = X_encoded[col].map(mapping)

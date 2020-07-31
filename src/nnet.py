@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch import optim
 from collections import Iterable
-
+from sklearn.preprocessing import LabelEncoder
 
 def trunc_normal_(x, mean=0., std=1.):
     "Truncated normal initialization."
@@ -47,11 +47,18 @@ def ifnone(a, b):
     "`a` if `a` is not None, otherwise `b`."
     return b if a is None else a
 
-class ClassifierModule(nn.Module):
+def label_encoder(X, cols): 
+    X_encoded = X.copy(deep=True)
+
+    for col in cols:
+        X_encoded.loc[:, col] = LabelEncoder().fit_transform(X_encoded.loc[:, col])
+    return X_encoded
+
+class FeedFowardNNet(nn.Module):
     "Basic model for tabular data."
     def __init__(self, emb_szs, cont, categ, out_sz, layers, ps=None,
-                 emb_drop=0.1, y_range=None, use_bn=True, bn_final=False):
-        super(ClassifierModule, self).__init__()
+                 emb_drop=0.1, y_range=None, use_bn=True, bn_final=False, nonlin=nn.ReLU):
+        super(FeedFowardNNet, self).__init__()
         ps = ifnone(ps, [0]*len(layers))
         ps = listify(ps, layers)
         n_cont = len(cont)
@@ -62,7 +69,7 @@ class ClassifierModule(nn.Module):
         self.n_emb,self.n_cont,self.y_range = n_emb,n_cont,y_range
         self.categ, self.cont= categ, cont
         sizes = self.get_sizes(layers, out_sz)
-        actns = [nn.ReLU(inplace=True) for _ in range(len(sizes)-2)] + [None]
+        actns = [nonlin(inplace=True) for _ in range(len(sizes)-2)] + [None]
         layers = []
         for i,(n_in,n_out,dp,act) in enumerate(zip(sizes[:-1],sizes[1:],[0.]+ps,actns)):
             layers += bn_drop_lin(n_in, n_out, bn=use_bn and i!=0, p=dp, actn=act)

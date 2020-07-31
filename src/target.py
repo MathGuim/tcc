@@ -1,12 +1,12 @@
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import OneHotEncoder
-from sklearn.base import TransformerMixin
+from sklearn.base import TransformerMixin, BaseEstimator
 import pandas as pd
 
 #if credit[['home']].isnull().any() raise Exception
 # isinstance(credit['home'], np.double) Logistic else Linear
 
-class TargetEncoder(TransformerMixin):
+class TargetEncoder(BaseEstimator, TransformerMixin):
     """
     Target Encoder for categorical features.
     """
